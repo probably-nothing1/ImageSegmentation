@@ -11,6 +11,8 @@ def normalize(tensor, means, stds):
   Normalizes tensor to 0 mean unit variance
   Assuming [B, C, H, W] dimensions
   '''
+  means = torch.FloatTensor(means)
+  stds = torch.FloatTensor(stds)
   return (tensor - means[None, :, None, None]) / stds[None, :, None, None]
 
 def get_train_dataset(folderpath):
