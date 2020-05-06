@@ -50,7 +50,7 @@ class UNet(nn.Module):
         x = torch.cat((x_cache1, x), dim=1)
         x = self.conv7(x)
 
-        return F.sigmoid(x)
+        return torch.sigmoid(x)
 
 
 class ConvBlock(nn.Module):
