@@ -16,4 +16,5 @@ class DiceLoss(nn.Module):
     count_B = prediction.sum(dim=0)
     intersection = (ground_truth * prediction).sum(dim=0)
     dice = 2 * intersection / (count_A + count_B)
+    dice = dice.mean()
     return 1 - dice
