@@ -11,6 +11,7 @@ from models import UNet
 from loss_functions import dispatch_loss_function, compute_loss
 from training import warmup, dispatch_lr_scheduler, get_lr, dispatch_optimizer
 from dataset import get_train_dataloader, get_test_dataloader
+from metrics import compute_IoU
 from utils import parse_args
 
 
@@ -34,10 +35,10 @@ if __name__ == '__main__':
     lr_scheduler = dispatch_lr_scheduler(optimizer, args)
 
     iteration = 0
-    # training_accuracy = compute_accuracy(model, train_dataloader, device)
-    # test_accuracy = compute_accuracy(model, test_dataloader, device)
-    # wandb.log({'training accuracy': training_accuracy}, step=iteration*bs)
-    # wandb.log({'test_accuracy': test_accuracy}, step=iteration*bs)
+    training_IoU = compute_IoU(model, train_dataloader, device)
+    test_IoU = compute_IoU(model, test_dataloader, device)
+    wandb.log({'training IoU': training_IoU}, step=iteration*bs)
+    wandb.log({'test IoU': test_IoU}, step=iteration*bs)
 
     for epoch in range(args.epochs):
         for image, true_mask in train_dataloader:
@@ -55,14 +56,14 @@ if __name__ == '__main__':
             wandb.log({'learning rate': get_lr(optimizer)}, step=iteration*bs)
 
             wandb.log({'iteration': iteration}, step=iteration * bs)
-            wandb.log({'iteration time': time.time() - start_time}, step=iteration*bs)
+            wandb.log({'iteration time': (time.time() - start_time) / bs}, step=iteration*bs)
             if iteration % 10 == 0:
                 test_loss = compute_loss(model, test_dataloader, loss_function, device)
                 wandb.log({'test loss': loss}, step=iteration*bs)
             iteration += 1
 
         lr_scheduler.step()
-        # training_accuracy = compute_accuracy(model, train_dataloader, device)
-        # test_accuracy = compute_accuracy(model, test_dataloader, device)
-        # wandb.log({'training accuracy': training_accuracy}, step=iteration*bs)
-        # wandb.log({'test_accuracy': test_accuracy}, step=iteration * bs)
+        training_IoU = compute_IoU(model, train_dataloader, device)
+        test_IoU = compute_IoU(model, test_dataloader, device)
+        wandb.log({'training IoU': training_IoU}, step=iteration*bs)
+        wandb.log({'test IoU': test_IoU}, step=iteration * bs)
