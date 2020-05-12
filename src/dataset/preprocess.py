@@ -17,7 +17,7 @@ def preprocess_images(folderpath, input_filepath, out_filepath):
     out_filepath = os.path.join(folderpath, out_filepath)
 
     array = np.load(input_filepath)
-    array = np.rollaxis(array, 3, 1)
+    array = np.einsum('bhwc->bchw', array)
     array = array.astype('float32')
     np.save(out_filepath, array)
 
