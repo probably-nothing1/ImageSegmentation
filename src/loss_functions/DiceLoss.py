@@ -11,10 +11,10 @@ class DiceLoss(nn.Module):
   def __init__(self):
     super().__init__()
 
-  def forward(self, ground_truth, prediction):
+  def forward(self, ground_truth, pixel_probabilities):
+    intersection = (ground_truth * pixel_probabilities).sum(dim=0)
     count_A = ground_truth.sum(dim=0)
-    count_B = prediction.sum(dim=0)
-    intersection = (ground_truth * prediction).sum(dim=0)
+    count_B = pixel_probabilities.sum(dim=0)
     dice = 2 * intersection / (count_A + count_B)
     dice = dice.mean()
     return 1 - dice
