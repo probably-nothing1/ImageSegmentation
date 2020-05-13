@@ -1,4 +1,5 @@
 from .DiceLoss import DiceLoss
+from .IoULoss import IoULoss
 from .PixelwiseCrossEntropyLoss import PixelwiseCrossEntropyLoss
 
 # https://neptune.ai/blog/image-segmentation-in-2020
@@ -12,7 +13,7 @@ def dispatch_loss_function(loss_function):
   elif loss_function == 'focal':
     raise NotImplementedError('Focal loss not implemented yet')
   elif loss_function == 'IoU':
-    raise NotImplementedError('IoU loss not implemented yet')
+    return IoULoss()
   elif loss_function == 'Lovasz-Softmax':
     raise NotImplementedError('Lovasz-Softmax loss not implemented yet')
   else:
