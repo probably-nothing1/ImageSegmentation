@@ -12,7 +12,7 @@ class Tversky(nn.Module):
     super().__init__()
     self.beta = beta
 
-  def forward(self, ground_truth, pixel_probabilities):
+  def forward(self, pixel_probabilities, ground_truth):
     intersection = (ground_truth * pixel_probabilities).sum(dim=0)
     false_positives = self.beta * ((1 - ground_truth) * pixel_probabilities).sum(dim=0)
     false_negatives = (1 - self.beta) * (ground_truth * (1 - pixel_probabilities)).sum(dim=0)

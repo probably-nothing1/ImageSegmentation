@@ -11,7 +11,7 @@ class IoULoss(nn.Module):
   def __init__(self):
     super().__init__()
 
-  def forward(self, ground_truth, pixel_probabilities):
+  def forward(self, pixel_probabilities, ground_truth):
     intersection = (ground_truth * pixel_probabilities).sum(dim=0)
     count_A = ground_truth.sum(dim=0)
     count_B = pixel_probabilities.sum(dim=0)

@@ -9,9 +9,9 @@ from .PixelwiseCrossEntropyLoss import PixelwiseCrossEntropyLoss
 def dispatch_loss_function(args):
   if args.loss_function == 'Dice':
     return DiceLoss()
-  elif args.loss_function == 'pixelwise_cross_entropy':
+  elif args.loss_function == 'PixelwiseCrossEntropy':
     return PixelwiseCrossEntropyLoss()
-  elif args.loss_function == 'focal':
+  elif args.loss_function == 'Focal':
     raise NotImplementedError('Focal loss not implemented yet')
   elif args.loss_function == 'IoU':
     return IoULoss()
@@ -32,7 +32,7 @@ def compute_loss(model, dataloader, loss_function, device, num=20):
             break
         image, true_mask = image.to(device), true_mask.to(device)
         predicted_mask = model(image)
-        loss = loss_function(true_mask, predicted_mask)
+        loss = loss_function(predicted_mask, true_mask)
         total_loss += loss.item()
 
     model.train()
