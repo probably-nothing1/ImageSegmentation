@@ -1,23 +1,27 @@
 from .DiceLoss import DiceLoss
 from .IoULoss import IoULoss
+from .Tversky import Tversky
 from .PixelwiseCrossEntropyLoss import PixelwiseCrossEntropyLoss
 
 # https://neptune.ai/blog/image-segmentation-in-2020
 # https://github.com/JunMa11/SegLoss
 
-def dispatch_loss_function(loss_function):
-  if loss_function == 'Dice':
+def dispatch_loss_function(args):
+  if args.loss_function == 'Dice':
     return DiceLoss()
-  elif loss_function == 'pixelwise_cross_entropy':
+  elif args.loss_function == 'pixelwise_cross_entropy':
     return PixelwiseCrossEntropyLoss()
-  elif loss_function == 'focal':
+  elif args.loss_function == 'focal':
     raise NotImplementedError('Focal loss not implemented yet')
-  elif loss_function == 'IoU':
+  elif args.loss_function == 'IoU':
     return IoULoss()
-  elif loss_function == 'Lovasz-Softmax':
+  elif args.loss_function == 'Lovasz-Softmax':
     raise NotImplementedError('Lovasz-Softmax loss not implemented yet')
+    return IoULoss()
+  elif args.loss_function == 'Tversky':
+    return Tversky(args.tversky_beta)
   else:
-    raise ValueError(f'Unrecognized loss function: "{loss_function}"')
+    raise ValueError(f'Unrecognized loss function: "{args.loss_function}"')
 
 def compute_loss(model, dataloader, loss_function, device, num=20):
     total_loss = 0
