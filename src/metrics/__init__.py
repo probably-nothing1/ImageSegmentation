@@ -1,1 +1,1 @@
-from .IoU import compute_IoU
+from .metrics import compute_metrics
