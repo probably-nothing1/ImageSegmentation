@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 from .constants import IMAGE_MEAN, IMAGE_STD
-from .augmentations import Identity
+from .augmentations import Identity, create_transforms
 
 class TensorDatasetWithTransformations(TensorDataset):
     def __init__(self, *tensors, transforms=[]):
@@ -54,9 +54,11 @@ def get_test_dataset(folderpath, transforms=[]):
     return TensorDatasetWithTransformations(test_images_tensor, test_masks_tensor, transforms=transforms)
 
 def get_train_dataloader(folderpath, batch_size, transforms=[]):
+    transforms = create_transforms(transforms)
     dataset = get_train_dataset(folderpath, transforms)
     return DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=11)
 
 def get_test_dataloader(folderpath, batch_size, transforms=[]):
+    transforms = create_transforms(transforms)
     dataset = get_test_dataset(folderpath, transforms)
     return DataLoader(dataset, batch_size=batch_size, shuffle=True, drop_last=False, num_workers=11)
