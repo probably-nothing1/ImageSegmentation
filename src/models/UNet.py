@@ -5,32 +5,32 @@ import torch.nn.functional as F
 class UNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1_1 = ConvBlock(3, 32)
-        self.conv1_2 = ConvBlock(32, 32)
+        self.conv1_1 = ConvBlock(3, 64)
+        self.conv1_2 = ConvBlock(64, 64)
         self.down1 = DownSampleBlock(2)
 
-        self.conv2_1 = ConvBlock(32, 64)
-        self.conv2_2 = ConvBlock(64, 64)
+        self.conv2_1 = ConvBlock(64, 128)
+        self.conv2_2 = ConvBlock(128, 128)
         self.down2 = DownSampleBlock(2)
 
-        self.conv3_1 = ConvBlock(64, 128)
-        self.conv3_2 = ConvBlock(128, 128)
+        self.conv3_1 = ConvBlock(128, 256)
+        self.conv3_2 = ConvBlock(256, 256)
         self.down3 = DownSampleBlock(2)
 
-        self.conv4_1 = ConvBlock(128, 128)
-        self.conv4_2 = ConvBlock(128, 128)
+        self.conv4_1 = ConvBlock(256, 256)
+        self.conv4_2 = ConvBlock(256, 256)
 
-        self.up1 = UpSampleBlock(128)
-        self.conv5_1 = ConvBlock(2*128, 64)
-        self.conv5_2 = ConvBlock(64, 64)
+        self.up1 = UpSampleBlock(256)
+        self.conv5_1 = ConvBlock(2*256, 256)
+        self.conv5_2 = ConvBlock(256, 128)
 
-        self.up2 = UpSampleBlock(64)
-        self.conv6_1 = ConvBlock(2*64, 32)
-        self.conv6_2 = ConvBlock(32, 32)
+        self.up2 = UpSampleBlock(128)
+        self.conv6_1 = ConvBlock(2*128, 128)
+        self.conv6_2 = ConvBlock(128, 64)
 
-        self.up3 = UpSampleBlock(32)
-        self.conv7_1 = ConvBlock(2*32, 32)
-        self.conv7_2 = ConvBlock(32, 1)
+        self.up3 = UpSampleBlock(64)
+        self.conv7_1 = ConvBlock(2*64, 64)
+        self.conv7_2 = ConvBlock(64, 1)
 
 
     def forward(self, x):
