@@ -17,20 +17,28 @@ class UNet(nn.Module):
         self.conv3_2 = ConvBlock(256, 256)
         self.down3 = DownSampleBlock(2)
 
-        self.conv4_1 = ConvBlock(256, 256)
-        self.conv4_2 = ConvBlock(256, 256)
+        self.conv4_1 = ConvBlock(256, 512)
+        self.conv4_2 = ConvBlock(512, 512)
+        self.down4 = DownSampleBlock(2)
 
-        self.up1 = UpSampleBlock(256)
-        self.conv5_1 = ConvBlock(2*256, 256)
-        self.conv5_2 = ConvBlock(256, 128)
+        self.conv5_1 = ConvBlock(512, 1024)
+        self.conv5_2 = ConvBlock(1024, 512)
 
-        self.up2 = UpSampleBlock(128)
-        self.conv6_1 = ConvBlock(2*128, 128)
-        self.conv6_2 = ConvBlock(128, 64)
+        self.up1 = UpSampleBlock(512)
+        self.conv6_1 = ConvBlock(2*512, 512)
+        self.conv6_2 = ConvBlock(512, 256)
 
-        self.up3 = UpSampleBlock(64)
-        self.conv7_1 = ConvBlock(2*64, 64)
-        self.conv7_2 = ConvBlock(64, 1)
+        self.up2 = UpSampleBlock(256)
+        self.conv7_1 = ConvBlock(2*256, 256)
+        self.conv7_2 = ConvBlock(256, 128)
+
+        self.up3 = UpSampleBlock(128)
+        self.conv8_1 = ConvBlock(2*128, 128)
+        self.conv8_2 = ConvBlock(128, 64)
+
+        self.up4 = UpSampleBlock(64)
+        self.conv9_1 = ConvBlock(2*64, 64)
+        self.conv9_2 = ConvBlock(64, 1)
 
 
     def forward(self, x):
@@ -47,22 +55,31 @@ class UNet(nn.Module):
         x = self.down3(x_cache3)
 
         x = self.conv4_1(x)
-        x = self.conv4_2(x)
+        x_cache4 = self.conv4_2(x)
+        x = self.down4(x_cache4)
 
-        x = self.up1(x)
-        x = torch.cat((x_cache3, x), dim=1)
         x = self.conv5_1(x)
         x = self.conv5_2(x)
 
-        x = self.up2(x)
-        x = torch.cat((x_cache2, x), dim=1)
+        x = self.up1(x)
+        x = torch.cat((x_cache4, x), dim=1)
         x = self.conv6_1(x)
         x = self.conv6_2(x)
 
-        x = self.up3(x)
-        x = torch.cat((x_cache1, x), dim=1)
+        x = self.up2(x)
+        x = torch.cat((x_cache3, x), dim=1)
         x = self.conv7_1(x)
         x = self.conv7_2(x)
+
+        x = self.up3(x)
+        x = torch.cat((x_cache2, x), dim=1)
+        x = self.conv8_1(x)
+        x = self.conv8_2(x)
+
+        x = self.up4(x)
+        x = torch.cat((x_cache1, x), dim=1)
+        x = self.conv9_1(x)
+        x = self.conv9_2(x)
 
         return torch.sigmoid(x)
 
