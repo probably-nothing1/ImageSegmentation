@@ -1,5 +1,9 @@
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
+
 import torch
-from dataset.augmentations import apply_inverse_transforms
+from src.dataset.augmentations import apply_inverse_transforms
 
 def compute_metrics(model, dataloader, transforms, device, dataset_version='flip'):
     if dataset_version == 'single':
