@@ -19,10 +19,10 @@ class TensorDatasetWithTransformations(TensorDataset):
         image, mask = super().__getitem__(index)
         image = tvtf.to_pil_image(image)
         if self.use_transforms:
-            image = tvtf.adjust_brightness(image, 0.65 + torch.rand(1) / 1.3)
-            image = tvtf.adjust_contrast(image, 0.75 + torch.rand(1) / 2.0)
-            image = tvtf.adjust_hue(image, (torch.rand(1) -0.5) / 25.0)
-            image = tvtf.adjust_saturation(image, 0.75 + torch.rand(1) / 2.0)
+            image = tvtf.adjust_brightness(image, 0.78 + torch.rand(1) / 2.5)
+            # image = tvtf.adjust_contrast(image, 0.75 + torch.rand(1) / 2.0)
+            # image = tvtf.adjust_hue(image, (torch.rand(1) -0.5) / 25.0)
+            image = tvtf.adjust_saturation(image, 0.85 + torch.rand(1) / 5.0)
         image = tvtf.to_tensor(image)
         image = tvtf.normalize(image, IMAGE_MEAN, IMAGE_STD)
         return image, mask
