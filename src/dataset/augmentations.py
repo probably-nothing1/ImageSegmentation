@@ -1,63 +1,41 @@
 import torch
 
+def identity(tensor):
+    return tensor
 
-class Transformation():
-    def __init__(self):
-        pass
+def flip(tensor):
+    return torch.flip(tensor, dims=(2,))
 
-    def transform(self, imgs, masks):
-        raise NotImplementedError
+def rot90(tensor):
+    return torch.rot90(tensor, k=1, dims=(1, 2))
 
-    def inverse_transform(self, imgs, masks):
-        raise NotImplementedError
+def rot270(tensor):
+    return torch.rot90(tensor, k=3, dims=(1, 2))
 
-class Identity(Transformation):
-    def __init__(self):
-        super().__init__()
+def rot90_flip(tensor):
+    return flip(rot90(tensor))
 
-    def transform(self, *tensors):
-        return tensors
-
-    def inverse_transform(self, *tensors):
-        return tensors
-
-class HorizontalFlip(Transformation):
-    def __init__(self):
-        super().__init__()
-
-    def transform(self, *tensors):
-        return tuple(torch.flip(tensor, dims=(2,)) for tensor in tensors)
-
-    def inverse_transform(self, *tensors):
-        return self.transform(*tensors)
+def rot270_flip(tensor):
+    return flip(rot270(tensor))
 
 
-class Rotate(Transformation):
-    def __init__(self, degree=90):
-        super().__init__()
-        assert degree in [90, 270], 'Can only rotate 90 and 270 degrees'
-        self.rotate_num_times = int(degree / 90)
+def apply_inverse_transforms(augmentations, dataset_version='flip'):
+    """
+    takes input of shape [6,C,H,W] where 6 is nuber of augmentations
+    outputs tensor of shape [6,C,H,W] where #A is nuber of augmentations
+    """
+    assert len(augmentations.shape) == 4, 'apply_transform() should take one tensor of shape [#A, C, H, W] where 6 number of augmentations'
+    if dataset_version == 'single':
+        assert augmentations.shape[0] == 1
+        transforms = [identity]
+        inverse_transformed_tensors = [tf(tensor) for tensor, tf in zip(augmentations, transforms)]
+    elif dataset_version == 'flip':
+        assert augmentations.shape[0] == 2
+        transforms = [identity, flip]
+        inverse_transformed_tensors = [tf(tensor) for tensor, tf in zip(augmentations, transforms)]
+    elif dataset_version == 'all':
+        assert augmentations.shape[0] == 6
+        transforms = [identity, rot270, rot90, flip, rot270_flip, rot90_flip]
+        inverse_transformed_tensors = [tf(tensor) for tensor, tf in zip(augmentations[:4], transforms)]
 
-    def rotation(self, *tensors, k):
-        return tuple(torch.rot90(tensor, k=k, dims=(1,2)) for tensor in tensors)
-
-    def transform(self, *tensors):
-        k = self.rotate_num_times
-        return self.rotation(*tensors, k=k)
-
-    def inverse_transform(self, *tensors):
-        k = 4 - self.rotate_num_times
-        return self.rotation(*tensors, k=k)
-
-def create_transforms(transforms):
-    return [create_transform(transform) for transform in transforms]
-
-def create_transform(transform):
-    if transform == 'flip':
-        return HorizontalFlip()
-    elif transform == 'rot90':
-        return Rotate(90)
-    elif transform == 'rot270':
-        return Rotate(270)
-    else:
-        raise ValueError(f'{transform} not recognized')
+    return torch.stack(inverse_transformed_tensors)
