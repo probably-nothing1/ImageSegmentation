@@ -24,6 +24,24 @@ def dispatch_loss_function(args):
   else:
     raise ValueError(f'Unrecognized loss function: "{args.loss_function}"')
 
+def dispatch_second_loss_function(args):
+  if args.second_loss_function == 'Dice':
+    return DiceLoss()
+  elif args.second_loss_function == 'PixelwiseCrossEntropy':
+    return PixelwiseCrossEntropyLoss()
+  elif args.second_loss_function == 'Focal':
+    return FocalLoss(args.focal_gamma)
+  elif args.second_loss_function == 'IoU':
+    return IoULoss()
+  elif args.second_loss_function == 'Lovasz-Softmax':
+    raise NotImplementedError('Lovasz-Softmax loss not implemented yet')
+    return IoULoss()
+  elif args.second_loss_function == 'Tversky':
+    return Tversky(args.tversky_beta)
+  else:
+    return None
+    # raise ValueError(f'Unrecognized loss function: "{args.second_loss_function}"')
+
 def compute_loss(model, dataloader, loss_function, device, num=20):
     total_loss = 0
     model.eval()
