@@ -1,25 +1,35 @@
 import torch
+from dataset.augmentations import apply_inverse_transforms
 
-def compute_metrics(model, dataloader, device):
+def compute_metrics(model, dataloader, transforms, device, dataset_version='flip'):
+    if dataset_version == 'single':
+        assert dataloader.batch_size == 1, 'Dataloader for evaluation should operate on batch size equal to 1'
+    elif dataset_version == 'flip':
+        assert dataloader.batch_size == 2, 'Dataloader for evaluation should operate on batch size equal to 2'
+    elif dataset_version == 'all':
+        assert dataloader.batch_size == 6, 'Dataloader for evaluation should operate on batch size equal to 6'
+    else:
+        assert False
+
+    print('Start evaluating')
     model.eval()
     total_iou = 0
     total_accuracy = 0
-    samples_seen = 0
-    for image, true_mask in dataloader:
-        image, true_mask = image.to(device), true_mask.to(device)
-        pixel_probabilities = model(image)
-
-        iou_batch = compute_IoU_batch(pixel_probabilities, true_mask)
+    for true_sample_count, (images, masks) in enumerate(dataloader):
+        images, masks = images.to(device), masks.to(device)
+        pixel_probabilities = model(images)
+        pixel_probabilities = apply_inverse_transforms(pixel_probabilities, dataset_version=dataset_version)
+        pixel_probability = pixel_probabilities.mean(dim=0, keepdim=True)
+        iou_batch = compute_IoU_batch(pixel_probability, masks[:1])
         total_iou += iou_batch.item()
 
-        accuracy_batch = compute_pixel_accuracy_batch(pixel_probabilities, true_mask)
+        accuracy_batch = compute_pixel_accuracy_batch(pixel_probability, masks[:1])
         total_accuracy += accuracy_batch.item()
 
-        samples_seen += len(image)
-
-    iou = total_iou / samples_seen
-    accuracy = total_accuracy / samples_seen
+    iou = total_iou / true_sample_count
+    accuracy = total_accuracy / true_sample_count
     model.train()
+    print('Done evaluating')
     return accuracy, iou
 
 def compute_IoU_batch(pixel_probabilities, true_mask):
@@ -43,7 +53,6 @@ def compute_pixel_accuracy_batch(pixel_probabilities, true_mask):
 
     true_positive = (true_mask * pixel_probabilities).sum(dim=(1,2,3))
     true_negative = ((1 - true_mask) * (1 - pixel_probabilities)).sum(dim=(1,2,3))
-
 
     accuracy = (true_positive + true_negative) / (h * w)
     return accuracy.sum()
